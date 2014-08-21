@@ -1,0 +1,200 @@
+<HTML>
+    <HEAD>
+        <SCRIPT>var isomorphicDir="../isomorphic/";</SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Core.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Foundation.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Containers.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Grids.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Forms.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_DataBinding.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/skins/EnterpriseBlue/load_skin.js></SCRIPT>
+        <title>SmartClient Tutorial for Beginners </title>
+    </HEAD>
+    <BODY>
+        <SCRIPT>
+            isc.RestDataSource.create({
+                ID:"countryDS",
+                fields:[
+                    {
+                        name:"continent", 
+                        title:"Continent", 
+                        type: "text"
+                    },
+                    {
+                        name:"countryName", 
+                        title:"Country", 
+                        type: "text"
+                    },
+                    {
+                        name:"countryCode", 
+                        title:"Code", 
+                        primaryKey:true, 
+                        canEdit:false, 
+                        type: "text"
+                    },
+                    
+                    {
+                        name:"population", 
+                        title:"Population", 
+                        type: "integer"
+                    },
+                   {
+                        name:"independence", 
+                        title:"Independence", 
+                        type: "date"
+                    },
+                    {
+                        name:"government", 
+                        title:"Government", 
+                        type: "text"
+                    },
+                    {
+                        name:"government_desc", 
+                        title:"Government desc", 
+                        type: "integer"
+                    },
+                    {
+                        name:"capital", 
+                        title:"Capital", 
+                        type: "text"
+                    },
+                    {
+                        name:"member_g8", 
+                        title:"Member g8", 
+                        type: "boolean"
+                    },
+                    {
+                        name:"article", 
+                        title:"Article", 
+                        type: "link"
+                    }
+                ],
+                  operationBindings:[
+				   {operationType:"fetch", dataProtocol:"getParams"},
+				   {operationType:"add", dataProtocol:"postParams"},
+				   {operationType:"remove", dataProtocol:"postParams", requestProperties:{httpMethod:"DELETE"}},
+				   {operationType:"update", dataProtocol:"postMessage", requestProperties:{httpMethod:"PUT"}}
+				   ],
+                dataFormat: "json",
+             //   dataURL:"/RestDataSourceJson/data/dataIntegration/json/responses/country_fetch_rest.js"
+                 dataURL  :"/rest/country"
+//                  fetchDataURL  :"/rest/country/fetch",
+// 				 addDataURL  :"/rest/country/add",
+// 				 updateDataURL  :"/rest/country/update",
+// 				 removeDataURL  :"/rest/country/remove"
+//                 fetchDataURL:"/quiz-app/RestDataSourceJson/data/dataIntegration/json/responses/country_fetch_rest.js",
+//                 addDataURL :"/quiz-app/RestDataSourceJson/data/dataIntegration/json/responses/country_add_rest.js",
+//                 updateDataURL:"/quiz-app/RestDataSourceJson/data/dataIntegration/json/responses/country_update_rest.js",
+//                 removeDataURL:"/quiz-app/RestDataSourceJson/data/dataIntegration/json/responses/country_remove_rest.js"
+
+
+            });
+            
+            
+            isc.defineClass('MainView',isc.VLayout);
+            isc.MainView.addProperties({
+            	
+            	width:'100%',
+            	height:'100%',
+				layoutMargin: 10,
+            	membersMargin: 10,
+            	grid:null,
+            	addBtn:null,
+            	updateBtn:null,
+            	deleteBtn:null,
+            	btnLayout:null,
+				label:null,
+            	overflow: "hidden",
+            	initWidget:function(){
+					this.label=isc.Label.create({
+						height: 100,
+						padding: 10,
+						align: "center",
+						valign: "center",
+						wrap: false,
+						icon: "/isomorphic/skins/EnterpriseBlue/images/approved.png",
+						showEdges: true,
+						contents: "<i> <b> Click on ADD NEW to start editing a new record, Double click on the record to Edit and type Enter to exit editing or Click on UPDATE to update the records. Click on DELETE to remove records. </b> </i>"
+					});
+					
+            		this.grid=isc.ListGrid.create({
+                        ID: "countryList",
+                        height:'50%',
+                        margin:10,
+                        dataSource: countryDS,
+                        showFilterEditor: true,
+                        autoFetchData:true,
+                        canEdit:true,
+                        editEvent: "doubleClick",
+						listEndEditAction: "next",
+						//enterKeyEditAction: "nextRowStart",
+						autoFitMaxRecords: 10,
+						autoFitData: "vertical"
+                    });
+            		
+            		this.addBtn = isc.IButton.create({
+            			width: '30%',
+            			height:30,
+                        title:"ADD NEW",
+                        click: function () {
+                        	countryList.startEditingNew();
+                            
+                            
+                        }
+                    }); 	
+            		
+            		
+            		this.updateBtn=  isc.IButton.create({
+                        
+            			width: '30%',
+            			height:30,
+                        title:"UDDATE",
+                        click: function () {
+                           countryList.saveEdits(function(rowNum,colNum,editCompletionEvent,success){
+						   isc.say('updated successfully.');
+						   });
+                        }
+                    });
+            		
+            this.deleteBtn=  isc.IButton.create({
+                
+            	width: '30%',
+    			height:30,
+                title:"DELETE",        
+                click: function () {
+					countryList.removeSelectedData(function(dsResponse,data,dsRequest){
+					isc.say('deleted successfully.');  
+					});
+                   
+                }
+            });
+            
+            
+            this.btnLayout=isc.HLayout.create({
+            	 height: '50%',
+            	 layoutMargin: 10,
+            	 membersMargin: 10,
+            	
+            });
+           
+		    this.btnLayout.addMember(this.addBtn);
+            this.btnLayout.addMember(this.updateBtn);
+            this.btnLayout.addMember(this.deleteBtn);
+			this.addMember(this.label);
+            this.addMember(this.grid);
+            this.addMember(this.btnLayout);
+           
+            this.Super('initWidget',arguments);
+            	}
+            });
+          
+            isc.MainView.create({}).show();
+
+          
+
+           
+
+           
+        </SCRIPT>
+    </BODY>
+</HTML>

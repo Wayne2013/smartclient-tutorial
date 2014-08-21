@@ -1,0 +1,133 @@
+<HTML>
+    <HEAD>
+        <SCRIPT>var isomorphicDir="../isomorphic/";</SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Core.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Foundation.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Containers.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Grids.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_Forms.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/system/modules/ISC_DataBinding.js></SCRIPT>
+        <SCRIPT SRC=../isomorphic/skins/EnterpriseBlue/load_skin.js></SCRIPT>
+        <title>SmartClient Tutorial for Beginners </title>
+    </HEAD>
+    <BODY>
+        <SCRIPT>
+            isc.RestDataSource.create({
+                ID:"countryForComboDS",
+                fields:[
+                    {
+                        name:"continent", 
+                        title:"Continent", 
+                        type: "text"
+                    },
+                    {
+                        name:"countryName", 
+                        title:"Country", 
+                        type: "text"
+                    },
+                    {
+                        name:"countryCode", 
+                        title:"Code", 
+                        primaryKey:true, 
+                        canEdit:false, 
+                        type: "text"
+                    },
+                    
+                    {
+                        name:"population", 
+                        title:"Population", 
+                        type: "integer"
+                    },
+                   {
+                        name:"independence", 
+                        title:"Independence", 
+                        type: "date"
+                    },
+                    {
+                        name:"government", 
+                        title:"Government", 
+                        type: "text"
+                    },
+                    {
+                        name:"government_desc", 
+                        title:"Government desc", 
+                        type: "integer"
+                    },
+                    {
+                        name:"capital", 
+                        title:"Capital", 
+                        type: "text"
+                    },
+                    {
+                        name:"member_g8", 
+                        title:"Member g8", 
+                        type: "boolean"
+                    },
+                    {
+                        name:"article", 
+                        title:"Article", 
+                        type: "link"
+                    }
+                ],
+                  operationBindings:[
+				   {operationType:"fetch", dataProtocol:"getParams"},
+				   {operationType:"add", dataProtocol:"postParams"},
+				   {operationType:"remove", dataProtocol:"postParams", requestProperties:{httpMethod:"DELETE"}},
+				   {operationType:"update", dataProtocol:"postMessage", requestProperties:{httpMethod:"PUT"}}
+				   ],
+                dataFormat: "json",
+                    dataURL  :"/rest/country"
+            });
+            
+            
+            isc.defineClass('MainComboView',isc.VLayout);
+            isc.MainComboView.addProperties({
+            	
+            	width:'100%',
+            	height:'100%',
+				layoutMargin: 10,
+            	membersMargin: 10,            	
+            	form:null,
+				label:null,
+            	overflow: "hidden",
+            	initWidget:function(){
+					this.label=isc.Label.create({
+						height: 100,
+						padding: 10,
+						align: "center",
+						valign: "center",
+						wrap: false,
+						icon: "/isomorphic/skins/EnterpriseBlue/images/approved.png",
+						showEdges: true,
+						contents: "<i> <b> Start typing the values, you can see the records are getting filtered. </b> </i>"
+					});
+					
+					this.form = isc.DynamicForm.create({
+										ID:"testForm",
+										width: 500,
+										numCols:4,
+										fields : [
+										{
+											name: "filteredCombo", title: "Item (ComboBox)", editorType: "ComboBoxItem", 
+											addUnknownValues:false,
+											optionDataSource: "countryForComboDS", 
+											displayField:"countryName", valueField:"countryCode",
+											filterFields:["countryCode", "countryName"],
+											pickListWidth:300,
+											pickListFields:[
+												{name:"countryCode"},
+												{name:"countryName"}
+											]
+										}
+										]
+									});		
+					this.addMember(this.label);
+            this.addMember(this.form);		
+			
+            this.Super('initWidget',arguments);
+            	}
+            });
+          isc.MainComboView.create({}).show(); 
+        </SCRIPT>
+    </BODY>
+</HTML>
